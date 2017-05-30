@@ -5,11 +5,11 @@ import java.util.Random;
 
 public class Dataset {
 	
-	final int RANDOM_DATASET_WIDTH = 1;
+	final int RANDOM_DATASET_WIDTH = 5;
 	
-	final int RANDOM_DATASET_HEIGHT = 5;
+	final int RANDOM_DATASET_HEIGHT = 8;
 	
-	final int NUM_OF_HASH_FUNCTIONS = 2;
+	final int NUM_OF_HASH_FUNCTIONS = 4;
 	
 	private ArrayList<Column> cols;
 
@@ -97,10 +97,21 @@ public class Dataset {
 		ArrayList<Permutation> pms = createPermutations(NUM_OF_HASH_FUNCTIONS);
 		ArrayList<ArrayList<Integer>> hashValues = getHashValues(pms);
 		
-		for(Column col : cols)
-			newCols.add(col.applyHashValues(hashValues));
+		do
+			for(Column col : cols)
+				newCols.add(col.applyHashValues(hashValues));			
+		while(!infiniteFree(newCols));
 		
 		return new Dataset(newCols);
+	}
+	
+	public static boolean infiniteFree(ArrayList<Column> cols){
+		for(Column col : cols)
+			for(Element el : col.getElements())
+				if(el.isInfinity())
+					return false;
+		
+		return true;
 	}
 	
 	public ArrayList<ArrayList<Integer>> getHashValues(ArrayList<Permutation> pms){
