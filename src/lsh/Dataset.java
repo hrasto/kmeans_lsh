@@ -9,7 +9,7 @@ public class Dataset {
 	
 	final int RANDOM_DATASET_HEIGHT = 8;
 	
-	final int NUM_OF_HASH_FUNCTIONS = 4;
+	final int NUM_OF_HASH_FUNCTIONS = 5;
 	
 	private ArrayList<Column> cols;
 

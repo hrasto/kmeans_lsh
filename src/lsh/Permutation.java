@@ -33,7 +33,7 @@ public class Permutation {
 		int hashValue = ((a*x+b) % p) % N;
 		
 		if(DEBUG)
-			System.out.println("Applying: h(" + x + ") = ((" + 
+			System.out.println("Applying hash-func.: h(" + x + ") = ((" + 
 				a + "*" + x + "+" + b + ") % " + p + ") % " + N + " = " + hashValue);
 		
 		return hashValue;
