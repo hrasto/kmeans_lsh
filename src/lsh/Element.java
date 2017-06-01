@@ -2,7 +2,7 @@ package lsh;
 
 public class Element {
 
-	private int value;
+	private double value;
 	
 	private boolean infinity;
 	
@@ -14,15 +14,25 @@ public class Element {
 		setValue(value);
 		setInfinity(false);
 	}
+
+	public Element(Object value){
+		setValue(new Double(value.toString()));
+		setInfinity(false);
+	}
+
+	public Element(double value){
+		setValue(value);
+		setInfinity(false);
+	}
 	
-	public int getValue() {
+	public double getValue() {
 		if(isInfinity())
 			throw new NullPointerException();
 		
 		return value;
 	}
 
-	public void setValue(int value) {
+	public void setValue(double value) {
 		if(isInfinity())
 			setInfinity(false);
 		

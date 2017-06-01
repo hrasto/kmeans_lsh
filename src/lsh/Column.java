@@ -2,6 +2,8 @@ package lsh;
 
 import java.util.ArrayList;
 
+import util.CSVParser;
+
 public class Column {
 	
 	final boolean DEBUG = true;
@@ -15,7 +17,7 @@ public class Column {
 	public Column(ArrayList<Element> elements) {
 		setElements(elements);
 	}
-	
+		
 	public ArrayList<Element> getElements() {
 		return elements;
 	}
@@ -75,5 +77,30 @@ public class Column {
 	
 	public Element getElement(int index){
 		return elements.get(index);
+	}
+	
+	public static ArrayList<Column> csv2columns(String path, String delimiter){
+		ArrayList<ArrayList<Object>> data = CSVParser.read(path, delimiter);
+		if(data.size() == 0)
+			throw new IllegalArgumentException();
+		
+		int width = data.get(0).size();
+		
+		for(ArrayList<Object> row : data)
+			if(row.size() != width)
+				throw new IllegalArgumentException();
+		
+		int rowOffset = 0;
+		boolean ignoreLastCol = true;
+		ArrayList<Column> result = new ArrayList<Column>();
+		if(ignoreLastCol)
+			--width;
+		for(int i = 0; i < width; ++i)
+			result.add(new Column());
+		for(int i = rowOffset; i < data.size(); ++i)
+			for(int j = 0; j < width; ++j)
+				result.get(j).addElement(new Element(data.get(i).get(j)));
+			
+		return result;
 	}
 }
