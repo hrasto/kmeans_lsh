@@ -38,9 +38,9 @@ public class Main {
 		ds.print(true, PRINT_COLS_LIMIT);
 		
 		try{
-			int bucketSize = 15; // such value, that we get ~15 buckets (clusters)
+			int bucketSize = 25; // such value, that we get ~15 buckets (clusters)
 			
-			ArrayList<Bucket> buckets = ds.groupByBuckets(bucketSize);	
+			ArrayList<Bucket> buckets = ds.groupByBuckets(bucketSize, gh);	
 			System.out.println("# of buckets: " + buckets.size());
 			
 			ArrayList<String> xData = new ArrayList<String>();

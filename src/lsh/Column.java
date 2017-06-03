@@ -26,6 +26,14 @@ public class Column {
 		setElements(elements);
 		hashValues(functions);
 	}
+	
+	public void setHashFunctions(ArrayList<HashFunction> functions){
+		this.hashFunctions = functions;
+	}
+
+	public ArrayList<HashFunction> getHashFunctions(){
+		return this.hashFunctions;
+	}
 		
 	public ArrayList<Element> getElements() {
 		return elements;
@@ -128,10 +136,6 @@ public class Column {
 		return hashValues;
 	}
 
-	public ArrayList<HashFunction> getHashFunctions(){
-		return hashFunctions;
-	}
-	
 	public double getHashValue(int index){
 		return hashValues.get(index);
 	}

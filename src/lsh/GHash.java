@@ -5,19 +5,19 @@ import java.util.ArrayList;
 public class GHash implements HashFunction {
 	
 	private ArrayList<Double> coefficients;
-	
+
 	public GHash() {
 		coefficients = new ArrayList<Double>();
-		coefficients.add(0.41);
-		coefficients.add(-0.12);
-		coefficients.add(-0.22);
-		coefficients.add(0.10);
-		coefficients.add(-0.51);
-		coefficients.add(0.28);
-		coefficients.add(0.35);
-		coefficients.add(0.09);
-		coefficients.add(-0.37);
-		coefficients.add(-0.15);
+		coefficients.add(0.25169);
+		coefficients.add(0.90415);
+		coefficients.add(0.62083);
+		coefficients.add(0.72157);
+		coefficients.add(0.18980);
+		coefficients.add(0.56721);
+		coefficients.add(0.48969);
+		coefficients.add(0.55342);
+		coefficients.add(0.37218);
+		coefficients.add(0.56078);
 	}
 
 	@Override

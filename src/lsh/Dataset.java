@@ -155,14 +155,14 @@ public class Dataset {
 		
 	}
 
-	public ArrayList<Bucket> groupByBuckets(double bucketSize) throws Exception {
+	public ArrayList<Bucket> groupByBuckets(double bucketSize, HashFunction func) throws Exception {
 		
 		if(!alreadyHashed)
 			throw new Exception("Data Set must be hashed before grouping");
 			
 		ArrayList<Bucket> res = new ArrayList<Bucket>();
-		double min = hashedMin();
-		double max = hashedMax();
+		double min = hashedMin(func);
+		double max = hashedMax(func);
 
 		// instantiate the buckets with size = 0
 		double bucketBorder = min;
@@ -173,38 +173,56 @@ public class Dataset {
 		
 		// add columns to the corresponding hash-buckets
 		for(Column col : cols){
-			int index = (int) ((col.getHashValue(0) - min) / bucketSize); // casting to INT floors the result
+			int index = (int) ((col.getHashValue(func) - min) / bucketSize); // casting to INT floors the result
 			res.get(index).addColumn(col);
 		}
 		
 		return res;
 	}
 	
-	public double hashedMin() throws Exception {
+	public double hashedMin(HashFunction func) throws Exception {
 		
 		if(!alreadyHashed)
 			throw new Exception("Data Set must be hashed before finding the hashed minimum");
 		
-		double min = cols.get(0).getHashValue(0);
+		double min = cols.get(0).getHashValue(func);
 		
 		for(Column col : cols)
-			if(min > col.getHashValue(0))
-				min = col.getHashValue(0);
+			if(min > col.getHashValue(func))
+				min = col.getHashValue(func);
 		
 		return min;
 	}
 
-	public double hashedMax() throws Exception {
+	public double hashedMax(HashFunction func) throws Exception {
 		
 		if(!alreadyHashed)
 			throw new Exception("Data Set must be hashed before finding the hashed minimum");
 		
-		double max = cols.get(0).getHashValue(0);
+		double max = cols.get(0).getHashValue(func);
 		
 		for(Column col : cols)
-			if(max < col.getHashValue(0))
-				max = col.getHashValue(0);
+			if(max < col.getHashValue(func))
+				max = col.getHashValue(func);
 		
 		return max;
+	}
+
+	public static boolean isCandidatePairOR(Column col1, Column col2){
+		
+		for(int i = 0; i < col1.getHashValues().size(); ++i)
+			if(col1.getHashValue(i) == col2.getHashValue(i))
+				return true;
+		
+		return false;		
+	}
+
+	public static boolean isCandidatePairAND(Column col1, Column col2){
+		
+		for(int i = 0; i < col1.getHashValues().size(); ++i)
+			if(col1.getHashValue(i) != col2.getHashValue(i))
+				return false;
+		
+		return true;		
 	}
 }
