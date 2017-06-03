@@ -5,16 +5,23 @@ import java.util.Random;
 
 public class Dataset {
 	
-	final int RANDOM_DATASET_WIDTH = 5;
+	final static int RANDOM_DATASET_WIDTH = 5;
 	
-	final int RANDOM_DATASET_HEIGHT = 8;
+	final static int RANDOM_DATASET_HEIGHT = 8;
 	
-	final int NUM_OF_HASH_FUNCTIONS = 5;
+	final static int NUM_OF_HASH_FUNCTIONS = 5;
 	
 	private ArrayList<Column> cols;
+	
+	private boolean alreadyHashed = false;
 
 	public Dataset(ArrayList<Column> cols) {
 		setCols(cols);
+	}
+
+	public Dataset(ArrayList<Column> cols, ArrayList<HashFunction> functions) {
+		setCols(cols);
+		hashColumns(functions);
 	}
 	
 	public Dataset(){
@@ -56,22 +63,28 @@ public class Dataset {
 		return this.cols;
 	}
 	
-	public void print(){
-		for(int i = 0; i < getHeight(); ++i){
-			String line = "";
-			line += "[ ";
-			for(int j = 0; j < getWidth(); ++j){
-				Element el = getElement(j,i);
-				
-				if(el.isInfinity())
-					line += "inf";
-				else
-					line += el.getValue();
-				
-				if(j < getWidth()-1) line += "\t| ";
-			}
-			line += " ]";
+	public void print(boolean hashed, Integer limit){
+		
+		if(hashed && !alreadyHashed)
+			throw new IllegalArgumentException();
+		
+		int outerLimit = hashed ? cols.get(0).getHashFunctions().size() : getHeight();
+		int innerLimit = limit != null && limit <= getWidth() ? limit : getWidth(); 
+		
+		for(int i = 0; i < outerLimit; ++i){
+			String line = "[ ";
 			
+			for(int j = 0; j < innerLimit; ++j){
+				if(hashed) 
+					line += cols.get(j).getHashValue(i);
+				else				
+					if(getElement(j,i).isInfinity()) line += "inf";
+					else line += getElement(j,i).getValue();
+				
+				if(j < innerLimit-1) line += "\t| ";
+			}
+			
+			line += "\t]";			
 			System.out.println(line);
 		}
 	}
@@ -131,5 +144,14 @@ public class Dataset {
 		for(int i = 0; i < howMany; ++i)
 			pms.add(p.next());
 		return pms;
+	}
+
+	public void hashColumns(ArrayList<HashFunction> functions){
+		
+		for(Column col : this.cols)
+			col.hashValues(functions);
+		
+		alreadyHashed = true;
+		
 	}
 }

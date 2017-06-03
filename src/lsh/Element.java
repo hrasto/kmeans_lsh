@@ -46,5 +46,11 @@ public class Element {
 	public void setInfinity(boolean infinity) {
 		this.infinity = infinity;
 	}
+	
+	public double hash(){
+		double res = value;
+		
+		return res;
+	}
 
 }

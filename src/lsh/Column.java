@@ -10,12 +10,21 @@ public class Column {
 	
 	private ArrayList<Element> elements;
 	
+	private ArrayList<Double> hashValues;
+
+	private ArrayList<HashFunction> hashFunctions;
+	
 	public Column(){
 		setElements(new ArrayList<Element>());
 	}
 	
 	public Column(ArrayList<Element> elements) {
 		setElements(elements);
+	}
+	
+	public Column(ArrayList<Element> elements, ArrayList<HashFunction> functions) {
+		setElements(elements);
+		hashValues(functions);
 	}
 		
 	public ArrayList<Element> getElements() {
@@ -90,17 +99,47 @@ public class Column {
 			if(row.size() != width)
 				throw new IllegalArgumentException();
 		
-		int rowOffset = 0;
 		boolean ignoreLastCol = true;
 		ArrayList<Column> result = new ArrayList<Column>();
-		if(ignoreLastCol)
-			--width;
-		for(int i = 0; i < width; ++i)
-			result.add(new Column());
-		for(int i = rowOffset; i < data.size(); ++i)
-			for(int j = 0; j < width; ++j)
-				result.get(j).addElement(new Element(data.get(i).get(j)));
+		if(ignoreLastCol) --width;
+		
+		for(ArrayList<Object> row : data){
+			Column col = new Column();
+			for(int i = 0; i < width; ++i){
+				col.addElement(new Element(row.get(i)));
+			}				
+			result.add(col);
+		}
 			
 		return result;
+	}
+	
+	public void hashValues(ArrayList<HashFunction> functions){
+		
+		hashFunctions = functions;
+		hashValues = new ArrayList<Double>();
+		
+		for(HashFunction func : functions)
+			hashValues.add(func.apply(elements));
+		
+	}
+	
+	public ArrayList<Double> getHashValues(){
+		return hashValues;
+	}
+
+	public ArrayList<HashFunction> getHashFunctions(){
+		return hashFunctions;
+	}
+	
+	public double getHashValue(int index){
+		return hashValues.get(index);
+	}
+	
+	public double getHashValue(HashFunction func){
+		
+		int index = hashFunctions.indexOf(func);
+		
+		return hashValues.get(index); 
 	}
 }
