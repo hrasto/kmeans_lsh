@@ -155,24 +155,25 @@ public class Dataset {
 		
 	}
 
-	public ArrayList<Integer> groupByBuckets(double bucketSize) throws Exception {
+	public ArrayList<Bucket> groupByBuckets(double bucketSize) throws Exception {
 		
 		if(!alreadyHashed)
 			throw new Exception("Data Set must be hashed before grouping");
 			
-		ArrayList<Integer> res = new ArrayList<Integer>();
+		ArrayList<Bucket> res = new ArrayList<Bucket>();
 		double min = hashedMin();
 		double max = hashedMax();
-		int i = 0;
+
+		// instantiate the buckets with size = 0
+		double bucketBorder = min;
+		while(bucketBorder < max){
+			res.add(new Bucket(bucketBorder, bucketBorder+bucketSize));
+			bucketBorder += bucketSize;
+		}
 		
-		while(min < max){
-			int count;			
-			for(count = 0; count+i < cols.size() && cols.get(count+i).getHashValue(0) < min + bucketSize; ++count);
-			
-			res.add(count);
-			
-			i += count;
-			min += bucketSize;
+		for(Column col : cols){
+			int index = (int) ((col.getHashValue(0) - min) / bucketSize); // casting floors the result
+			res.get(index).addColumn(col); // add column to the bucket
 		}
 		
 		return res;

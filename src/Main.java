@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 
 import chart.Plot;
+import lsh.Bucket;
 import lsh.Column;
 import lsh.Dataset;
 import lsh.FHash;
@@ -10,7 +11,7 @@ public class Main {
 	
 	final static int PRINT_COLS_LIMIT = 15;
 	
-	final static String CSV_PATH = "nmi_sample.csv";
+	final static String CSV_PATH = "nmi.csv";
 	
 	final static String CSV_DELIMITER = ",";
 
@@ -33,14 +34,17 @@ public class Main {
 		ds.print(true, PRINT_COLS_LIMIT);
 		
 		try{
-			ArrayList<Integer> buckets = ds.groupByBuckets(5);	
-			System.out.println(buckets.size());
+			ArrayList<Bucket> buckets = ds.groupByBuckets(12);	
+			System.out.println("# of buckets: " + buckets.size());
 			
 			ArrayList<String> xData = new ArrayList<String>();
-			for(Integer i = 0; i < buckets.size(); ++i)
-				xData.add(i.toString());
+			ArrayList<Integer> yData = new ArrayList<Integer>();
+			for(Bucket bkt : buckets){
+				xData.add(bkt.getMin().toString());
+				yData.add(bkt.getSize());
+			}
 			
-			Plot.barChart(xData, buckets, "hash_buckets", "Buckets", "Bucket Size", 500, 500);
+			Plot.barChart(xData, yData, "hash_buckets", "Buckets", "Bucket Size", 500, 500);
 			
 		}catch(Exception e){
 			e.printStackTrace();
