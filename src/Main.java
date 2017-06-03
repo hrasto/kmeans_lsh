@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 
+import chart.Plot;
 import lsh.Column;
 import lsh.Dataset;
 import lsh.FHash;
@@ -30,6 +31,20 @@ public class Main {
 		// output a sample of hashed data
 		System.out.println("Hashed:");
 		ds.print(true, PRINT_COLS_LIMIT);
+		
+		try{
+			ArrayList<Integer> buckets = ds.groupByBuckets(5);	
+			System.out.println(buckets.size());
+			
+			ArrayList<String> xData = new ArrayList<String>();
+			for(Integer i = 0; i < buckets.size(); ++i)
+				xData.add(i.toString());
+			
+			Plot.barChart(xData, buckets, "hash_buckets", "Buckets", "Bucket Size", 500, 500);
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		
 		/*
 		Dataset ds = new Dataset();

@@ -154,4 +154,55 @@ public class Dataset {
 		alreadyHashed = true;
 		
 	}
+
+	public ArrayList<Integer> groupByBuckets(double bucketSize) throws Exception {
+		
+		if(!alreadyHashed)
+			throw new Exception("Data Set must be hashed before grouping");
+			
+		ArrayList<Integer> res = new ArrayList<Integer>();
+		double min = hashedMin();
+		double max = hashedMax();
+		int i = 0;
+		
+		while(min < max){
+			int count;			
+			for(count = 0; count+i < cols.size() && cols.get(count+i).getHashValue(0) < min + bucketSize; ++count);
+			
+			res.add(count);
+			
+			i += count;
+			min += bucketSize;
+		}
+		
+		return res;
+	}
+	
+	public double hashedMin() throws Exception {
+		
+		if(!alreadyHashed)
+			throw new Exception("Data Set must be hashed before finding the hashed minimum");
+		
+		double min = cols.get(0).getHashValue(0);
+		
+		for(Column col : cols)
+			if(min > col.getHashValue(0))
+				min = col.getHashValue(0);
+		
+		return min;
+	}
+
+	public double hashedMax() throws Exception {
+		
+		if(!alreadyHashed)
+			throw new Exception("Data Set must be hashed before finding the hashed minimum");
+		
+		double max = cols.get(0).getHashValue(0);
+		
+		for(Column col : cols)
+			if(max < col.getHashValue(0))
+				max = col.getHashValue(0);
+		
+		return max;
+	}
 }
