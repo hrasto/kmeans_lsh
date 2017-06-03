@@ -7,15 +7,11 @@ import lsh.HashFunction;
 
 public class Main {
 	
-	final static int PRINT_COLS_LIMIT = 5;
+	final static int PRINT_COLS_LIMIT = 15;
 	
 	final static String CSV_PATH = "nmi_sample.csv";
 	
 	final static String CSV_DELIMITER = ",";
-
-	public Main() {
-		
-	}
 
 	public static void main(String[] args) {
 		
