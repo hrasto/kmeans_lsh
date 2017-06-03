@@ -5,6 +5,7 @@ import lsh.Bucket;
 import lsh.Column;
 import lsh.Dataset;
 import lsh.FHash;
+import lsh.GHash;
 import lsh.HashFunction;
 
 public class Main {
@@ -19,7 +20,10 @@ public class Main {
 		
 		// instantiate the hash-functions
 		ArrayList<HashFunction> functions = new ArrayList<HashFunction>();
-		functions.add(new FHash());
+		HashFunction fh = new FHash();
+		HashFunction gh = new GHash();
+		functions.add(fh);
+		functions.add(gh);
 		
 		// read the raw data from CSV, create data set
 		ArrayList<Column> cols = Column.csv2columns(CSV_PATH, CSV_DELIMITER);
@@ -34,17 +38,24 @@ public class Main {
 		ds.print(true, PRINT_COLS_LIMIT);
 		
 		try{
-			ArrayList<Bucket> buckets = ds.groupByBuckets(12);	
+			int bucketSize = 15; // such value, that we get ~15 buckets (clusters)
+			
+			ArrayList<Bucket> buckets = ds.groupByBuckets(bucketSize);	
 			System.out.println("# of buckets: " + buckets.size());
 			
 			ArrayList<String> xData = new ArrayList<String>();
 			ArrayList<Integer> yData = new ArrayList<Integer>();
 			for(Bucket bkt : buckets){
-				xData.add(bkt.getMin().toString());
+				xData.add(Double.toString(Math.floor(bkt.getMin())));
 				yData.add(bkt.getSize());
 			}
 			
-			Plot.barChart(xData, yData, "hash_buckets", "Buckets", "Bucket Size", 500, 500);
+			Plot.barChart(xData, yData, "hash_buckets", "Buckets", "Bucket Size", 1600, 500);
+			
+			// output buckets
+			for(int i = 0; i < buckets.size(); ++i){
+				System.out.println("Bucket "+i+": "+buckets.get(i).getSize()+" columns (points)");
+			}
 			
 		}catch(Exception e){
 			e.printStackTrace();

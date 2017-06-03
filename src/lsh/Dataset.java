@@ -171,9 +171,10 @@ public class Dataset {
 			bucketBorder += bucketSize;
 		}
 		
+		// add columns to the corresponding hash-buckets
 		for(Column col : cols){
-			int index = (int) ((col.getHashValue(0) - min) / bucketSize); // casting floors the result
-			res.get(index).addColumn(col); // add column to the bucket
+			int index = (int) ((col.getHashValue(0) - min) / bucketSize); // casting to INT floors the result
+			res.get(index).addColumn(col);
 		}
 		
 		return res;
