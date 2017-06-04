@@ -47,6 +47,43 @@ public class CSVParser {
 		return new ArrayList<ArrayList<Object>>();
 	}
 
+	public static ArrayList<Object> readLastCol(String path, String delimiter) {
+		BufferedReader br = null;
+		String line = "";
+		try {
+			br = new BufferedReader(new FileReader(path));
+			// Object[][] result = new Object[lines][];
+			ArrayList<Object> result = new ArrayList<Object>();
+
+			int limit = 300000;
+			int count = 0;
+			while ((line = br.readLine()) != null) {
+				if(count >= limit)
+					break;
+
+				result.add(Arrays.asList(line.split(delimiter)).get(10));
+				++count;
+			}
+
+			return result;
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		return new ArrayList<Object>();
+	}
+
+	
 	public static void write(ArrayList<ArrayList<Object>> data, String path, String delimiter) {
 		try {
 			PrintWriter writer = new PrintWriter(path, "UTF-8");

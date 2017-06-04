@@ -13,7 +13,7 @@ public class Cluster {
 	
 	private Column centroid;
 	
-	final static boolean DEBUG = true;
+	final static boolean DEBUG = false;
 	
 	public Cluster(){
 		points = new ArrayList<Column>();

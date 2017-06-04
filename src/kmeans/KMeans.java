@@ -11,9 +11,9 @@ import lsh.HashFunction;
 
 public class KMeans {
 	
-	final static String COMBINING_STRATEGY = "OR";
+	final static String COMBINING_STRATEGY = "NONE";
 	
-	final static int BUCKET_SIZE = 5;
+	final static int BUCKET_SIZE = 10;
 
 	final static int NUM_OF_CLUSTERS = 15;
 	
@@ -96,12 +96,14 @@ public class KMeans {
 	
 	public void initializeClusters() throws Exception{
 		
+		System.out.println("------------");
 		System.out.println("INITIALIZING");
+		System.out.println("------------");
 		
 		ArrayList<Bucket> bucketsF = new ArrayList<Bucket>();
 		
 		try{
-			bucketsF = data.groupByBuckets(bktResolvers.get(0));
+			bucketsF = data.groupByBuckets(bktResolvers.get(1));
 			System.out.println("# of buckets: " + bucketsF.size());
 			Collections.sort(bucketsF, 
                     (o1, o2) -> (new Integer(o2.getCols().size())).compareTo(o1.getCols().size()));
@@ -138,7 +140,7 @@ public class KMeans {
 		double begin,end;
 
 		for(Cluster cluster : clusters){
-			cluster.resetPoints();
+			cluster.resetPoints(); // centroid stays
 		}
 
 		begin = System.nanoTime();
@@ -149,14 +151,12 @@ public class KMeans {
 				if(COMBINING_STRATEGY.equals("OR")){
 					if(cluster.isCandidatePairOR(bktResolvers, col)){
 						cluster.addPoint(col);
-						//processedCols.add(col);
 						assigned = true;
 						break;
 					}
 				}else if(COMBINING_STRATEGY.equals("AND")){
 					if(cluster.isCandidatePairAND(bktResolvers, col)){
 						cluster.addPoint(col);
-						//processedCols.add(col);
 						assigned = true;
 						break;
 					}
@@ -210,9 +210,6 @@ public class KMeans {
 		begin = System.nanoTime();
 		int count = 0;
 		for(Column col : unprocessedCols){
-			
-			//if(processedCols.contains(col)) continue;
-			
 			Cluster newCluster = clusters.get(0);
 			int newClusterId = 0;
 			double min = Column.euclidianDistance(newCluster.getCentroid(), col);
@@ -244,8 +241,10 @@ public class KMeans {
 		double before = System.nanoTime();
 		
 		for(int i = 0; i < numOfIterations; ++i){
-			
+
+			System.out.println("------------");
 			System.out.println("ITERATION " + i);
+			System.out.println("------------");
 			
 			if(i > 0) recomputeCentroids();
 			
@@ -254,9 +253,11 @@ public class KMeans {
 		}
 		
 		double after = System.nanoTime();
-		
+
+		System.out.println("------------");
 		double elapsedMillis = (after - before) / 1000000;
-		System.out.println("Elapsed milliseconds: " + elapsedMillis);
+		System.out.println("FINISHED; Elapsed milliseconds: " + elapsedMillis);
+		System.out.println("------------");
 		
 		return this;
 	}
