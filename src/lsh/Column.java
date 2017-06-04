@@ -2,6 +2,7 @@ package lsh;
 
 import java.util.ArrayList;
 
+import kmeans.Cluster;
 import util.CSVParser;
 
 public class Column {
@@ -10,23 +11,41 @@ public class Column {
 	
 	private ArrayList<Element> elements;
 	
-	private ArrayList<Double> hashValues;
+	//private ArrayList<Double> hashValues;
+	
+	private ArrayList<Integer> hashBuckets;
 
-	private ArrayList<HashFunction> hashFunctions;
+	//private ArrayList<HashFunction> hashFunctions;
+	
+	private Cluster assignedCluster;
 	
 	public Column(){
 		setElements(new ArrayList<Element>());
+		hashBuckets = new ArrayList<Integer>();
 	}
 	
 	public Column(ArrayList<Element> elements) {
 		setElements(elements);
+		hashBuckets = new ArrayList<Integer>();
 	}
 	
+	/*
 	public Column(ArrayList<Element> elements, ArrayList<HashFunction> functions) {
 		setElements(elements);
 		hashValues(functions);
+		hashBuckets = new ArrayList<Integer>();
+	}
+	*/
+	
+	public void setAssignedCluster(Cluster cluster){
+		this.assignedCluster = cluster;
 	}
 	
+	public Cluster getAssignedCluster(){
+		return assignedCluster;
+	}
+	
+	/*
 	public void setHashFunctions(ArrayList<HashFunction> functions){
 		this.hashFunctions = functions;
 	}
@@ -34,6 +53,7 @@ public class Column {
 	public ArrayList<HashFunction> getHashFunctions(){
 		return this.hashFunctions;
 	}
+	*/
 		
 	public ArrayList<Element> getElements() {
 		return elements;
@@ -122,28 +142,73 @@ public class Column {
 		return result;
 	}
 	
-	public void hashValues(ArrayList<HashFunction> functions){
+	public void hashValues(ArrayList<BucketArithmetic> resolvers){
 		
-		hashFunctions = functions;
+		for(BucketArithmetic resolver : resolvers)
+			hashBuckets.add(resolver.getBucketIndex(this));
+		
+	}
+	
+	public int getHashBucket(int index){
+		return hashBuckets.get(index);
+	}
+	
+	public ArrayList<Integer> getHashBuckets(){
+		return hashBuckets;
+	}
+	
+	/*	
+	public void hashValues(){
 		hashValues = new ArrayList<Double>();
-		
-		for(HashFunction func : functions)
+		for(HashFunction func : hashFunctions){
 			hashValues.add(func.apply(elements));
-		
+		}
 	}
 	
 	public ArrayList<Double> getHashValues(){
 		return hashValues;
 	}
+	
+	public ArrayList<Bucket> getHashBuckets(){
+		return hashBuckets;
+	}
+	
+	public Bucket getHashBucket(int index){
+		return hashBuckets.get(index);
+	}
 
+	public void addHashBucket(Bucket bkt){
+		
+		hashBuckets.add(bkt); 
+	}
+	
+	
 	public double getHashValue(int index){
 		return hashValues.get(index);
 	}
+	
 	
 	public double getHashValue(HashFunction func){
 		
 		int index = hashFunctions.indexOf(func);
 		
 		return hashValues.get(index); 
+	}
+	*/
+	
+	public static double euclidianDistance(Column col1, Column col2){
+		double sumSquares = 0;
+		for(int i = 0; i < col1.getElements().size(); ++i)
+			sumSquares += Math.pow((col1.getElement(i).getValue() - col2.getElement(i).getValue()), 2);
+		
+		return Math.sqrt(sumSquares);			
+	}
+	
+	public void print(){
+		String line = "";
+		for(Element el : elements){
+			line += "| " + el.getValue() + " |";
+		}
+		System.out.println(line);
 	}
 }

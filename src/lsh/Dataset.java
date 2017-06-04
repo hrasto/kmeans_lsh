@@ -19,10 +19,12 @@ public class Dataset {
 		setCols(cols);
 	}
 
+	/*
 	public Dataset(ArrayList<Column> cols, ArrayList<HashFunction> functions) {
 		setCols(cols);
 		hashColumns(functions);
 	}
+	*/
 	
 	public Dataset(){
 		ArrayList<Column> testCols = generateRandomCols(RANDOM_DATASET_WIDTH, RANDOM_DATASET_HEIGHT);
@@ -63,12 +65,16 @@ public class Dataset {
 		return this.cols;
 	}
 	
+	public boolean isAlreadyHashed(){
+		return alreadyHashed;
+	}
+	
 	public void print(boolean hashed, Integer limit){
 		
 		if(hashed && !alreadyHashed)
 			throw new IllegalArgumentException();
 		
-		int outerLimit = hashed ? cols.get(0).getHashFunctions().size() : getHeight();
+		int outerLimit = hashed ? cols.get(0).getHashBuckets().size() : getHeight();
 		int innerLimit = limit != null && limit <= getWidth() ? limit : getWidth(); 
 		
 		for(int i = 0; i < outerLimit; ++i){
@@ -76,7 +82,7 @@ public class Dataset {
 			
 			for(int j = 0; j < innerLimit; ++j){
 				if(hashed) 
-					line += cols.get(j).getHashValue(i);
+					line += cols.get(j).getHashBucket(i);
 				else				
 					if(getElement(j,i).isInfinity()) line += "inf";
 					else line += getElement(j,i).getValue();
@@ -146,83 +152,72 @@ public class Dataset {
 		return pms;
 	}
 
-	public void hashColumns(ArrayList<HashFunction> functions){
+	public void hashColumns(ArrayList<BucketArithmetic> resolvers){
 		
 		for(Column col : this.cols)
-			col.hashValues(functions);
+			col.hashValues(resolvers);
 		
 		alreadyHashed = true;
 		
 	}
 
-	public ArrayList<Bucket> groupByBuckets(double bucketSize, HashFunction func) throws Exception {
+	public ArrayList<Bucket> groupByBuckets(BucketArithmetic resolver) {
 		
 		if(!alreadyHashed)
-			throw new Exception("Data Set must be hashed before grouping");
+			return null;
 			
 		ArrayList<Bucket> res = new ArrayList<Bucket>();
-		double min = hashedMin(func);
-		double max = hashedMax(func);
-
+		
 		// instantiate the buckets with size = 0
-		double bucketBorder = min;
-		while(bucketBorder < max){
-			res.add(new Bucket(bucketBorder, bucketBorder+bucketSize));
-			bucketBorder += bucketSize;
+		double bucketBorder = resolver.getMin();
+		
+		while(bucketBorder < hashedMax(resolver.getFunc())){
+			res.add(new Bucket(bucketBorder, bucketBorder+resolver.getBucketSize()));
+			bucketBorder += resolver.getBucketSize();
 		}
 		
 		// add columns to the corresponding hash-buckets
 		for(Column col : cols){
-			int index = (int) ((col.getHashValue(func) - min) / bucketSize); // casting to INT floors the result
+			int index = resolver.getBucketIndex(col);			
 			res.get(index).addColumn(col);
 		}
 		
 		return res;
 	}
 	
-	public double hashedMin(HashFunction func) throws Exception {
-		
+	public double hashedMin(HashFunction func) {
+		/*
 		if(!alreadyHashed)
 			throw new Exception("Data Set must be hashed before finding the hashed minimum");
+			*/
 		
-		double min = cols.get(0).getHashValue(func);
+		double min = func.apply(cols.get(0).getElements());
 		
-		for(Column col : cols)
-			if(min > col.getHashValue(func))
-				min = col.getHashValue(func);
+		for(Column col : cols){
+			double newMin = func.apply(col.getElements());
+			if(min > newMin)
+				min = newMin;
+		}
 		
 		return min;
 	}
 
-	public double hashedMax(HashFunction func) throws Exception {
+	public double hashedMax(HashFunction func) {
 		
+		/*
 		if(!alreadyHashed)
 			throw new Exception("Data Set must be hashed before finding the hashed minimum");
+			*/
 		
-		double max = cols.get(0).getHashValue(func);
+		double max = func.apply(cols.get(0).getElements());
 		
-		for(Column col : cols)
-			if(max < col.getHashValue(func))
-				max = col.getHashValue(func);
+		for(Column col : cols){
+			double newMax = func.apply(col.getElements());
+			if(max < newMax)
+				max = newMax;
+		}
 		
 		return max;
 	}
 
-	public static boolean isCandidatePairOR(Column col1, Column col2){
-		
-		for(int i = 0; i < col1.getHashValues().size(); ++i)
-			if(col1.getHashValue(i) == col2.getHashValue(i))
-				return true;
-		
-		return false;		
-	}
-
-	public static boolean isCandidatePairAND(Column col1, Column col2){
-		
-		for(int i = 0; i < col1.getHashValues().size(); ++i)
-			if(col1.getHashValue(i) != col2.getHashValue(i))
-				return false;
-		
-		return true;		
-	}
 }

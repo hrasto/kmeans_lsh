@@ -1,9 +1,10 @@
 import java.util.ArrayList;
 
-import chart.Plot;
-import lsh.Bucket;
+import kmeans.Cluster;
+import kmeans.KMeans;
 import lsh.Column;
 import lsh.Dataset;
+import lsh.Element;
 import lsh.FHash;
 import lsh.GHash;
 import lsh.HashFunction;
@@ -11,6 +12,8 @@ import lsh.HashFunction;
 public class Main {
 	
 	final static int PRINT_COLS_LIMIT = 15;
+	
+	final static int NUM_OF_ITERATIONS = 1;
 	
 	final static String CSV_PATH = "nmi.csv";
 	
@@ -27,8 +30,9 @@ public class Main {
 		
 		// read the raw data from CSV, create data set
 		ArrayList<Column> cols = Column.csv2columns(CSV_PATH, CSV_DELIMITER);
-		Dataset ds = new Dataset(cols, functions);
+		Dataset ds = new Dataset(cols);
 		
+		/*
 		// output a sample of raw data
 		System.out.println("Raw:");
 		ds.print(false, PRINT_COLS_LIMIT);
@@ -36,8 +40,22 @@ public class Main {
 		// output a sample of hashed data
 		System.out.println("Hashed:");
 		ds.print(true, PRINT_COLS_LIMIT);
+		*/
 		
 		try{
+			
+			KMeans km = new KMeans(ds, functions);
+			ArrayList<Cluster> clusters = km.execute(NUM_OF_ITERATIONS).getClusters();
+
+			for(Cluster cluster : clusters){
+				String line = "Cluster ";
+				for(Element val : cluster.getCentroid().getElements())
+					line += "| " + val.getValue() + " |";
+				line += " containing " + cluster.getPoints().size() + " points";
+				System.out.println(line);
+			}
+			
+			/*
 			int bucketSize = 25; // such value, that we get ~15 buckets (clusters)
 			
 			ArrayList<Bucket> buckets = ds.groupByBuckets(bucketSize, gh);	
@@ -56,6 +74,7 @@ public class Main {
 			for(int i = 0; i < buckets.size(); ++i){
 				System.out.println("Bucket "+i+": "+buckets.get(i).getSize()+" columns (points)");
 			}
+			*/
 			
 		}catch(Exception e){
 			e.printStackTrace();
