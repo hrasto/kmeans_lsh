@@ -13,7 +13,7 @@ public class KMeans {
 	
 	final static String COMBINING_STRATEGY = "OR";
 	
-	final static int BUCKET_SIZE = 15;
+	final static int BUCKET_SIZE = 5;
 
 	final static int NUM_OF_CLUSTERS = 15;
 	
@@ -102,6 +102,7 @@ public class KMeans {
 		
 		try{
 			bucketsF = data.groupByBuckets(bktResolvers.get(0));
+			System.out.println("# of buckets: " + bucketsF.size());
 			Collections.sort(bucketsF, 
                     (o1, o2) -> (new Integer(o2.getCols().size())).compareTo(o1.getCols().size()));
 			
@@ -133,38 +134,84 @@ public class KMeans {
 		
 		System.out.println("Reassigning the points (" + data.getCols().size() + " total)");
 
-		ArrayList<Column> processedCols = new ArrayList<Column>();
-		
+		ArrayList<Column> unprocessedCols = new ArrayList<Column>();
+		double begin,end;
+
+		for(Cluster cluster : clusters){
+			cluster.resetPoints();
+		}
+
+		begin = System.nanoTime();
+		boolean assigned;
+		for(Column col : data.getCols()){
+			assigned = false;
+			for(Cluster cluster : clusters){
+				if(COMBINING_STRATEGY.equals("OR")){
+					if(cluster.isCandidatePairOR(bktResolvers, col)){
+						cluster.addPoint(col);
+						//processedCols.add(col);
+						assigned = true;
+						break;
+					}
+				}else if(COMBINING_STRATEGY.equals("AND")){
+					if(cluster.isCandidatePairAND(bktResolvers, col)){
+						cluster.addPoint(col);
+						//processedCols.add(col);
+						assigned = true;
+						break;
+					}
+				}
+			}
+			if(assigned == false)
+				unprocessedCols.add(col);
+		}
+		end = System.nanoTime();
+		System.out.println("Time for first loop: " + ((end-begin)/1000000));
+
+		/*
 		// assigning columns with the help of hash buckets
 		for(Cluster cluster : clusters){
 			// System.out.println("Cluster HV f: " + cluster.getCentroid().getHashValue(0));
 			// System.out.println("Cluster HV g: " + cluster.getCentroid().getHashValue(1));
 			for(Column col : data.getCols()){	
+				
+				if(processedCols.contains(col)) continue;
+				
+				if(
+					cluster.getCentroid().getHashBucket(0) == col.getHashBucket(0)
+					&& cluster.getCentroid().getHashBucket(1) == col.getHashBucket(1)
+				) {
+					cluster.addPoint(col);
+					processedCols.add(col);
+				}
+				
+				/*
 				// System.out.println("Col HV f: " + unprCol.getHashValue(0));
 				// System.out.println("Col HV g: " + unprCol.getHashValue(1));
-				if(!processedCols.contains(col) && COMBINING_STRATEGY.equals("OR")){
+				if(COMBINING_STRATEGY.equals("OR")){
 					if(cluster.isCandidatePairOR(bktResolvers, col)){
-						// process this column
 						cluster.addPoint(col);
 						processedCols.add(col);
 					}
-				}else if(!processedCols.contains(col) && COMBINING_STRATEGY.equals("AND")){
+				}else if(COMBINING_STRATEGY.equals("AND")){
 					if(cluster.isCandidatePairAND(bktResolvers, col)){
-						// just add it to this cluster
 						cluster.addPoint(col);
 						processedCols.add(col);
 					}
 				}
 			}			
 		}
+				*/
 		
-		System.out.println("Points assigned based on hashing: " + processedCols.size());
-		System.out.println("Remaining points to assign: " + (data.getCols().size() - processedCols.size()));
+		System.out.println("Points assigned based on hashing: " + (data.getCols().size() - unprocessedCols.size()));
+		System.out.println("Remaining points to assign: " + (unprocessedCols.size()));
 		
 		// assigning the remaining columns 
-		for(Column col : data.getCols()){
+		begin = System.nanoTime();
+		int count = 0;
+		for(Column col : unprocessedCols){
 			
-			if(processedCols.contains(col)) continue;
+			//if(processedCols.contains(col)) continue;
 			
 			Cluster newCluster = clusters.get(0);
 			int newClusterId = 0;
@@ -177,8 +224,13 @@ public class KMeans {
 					newClusterId = i;
 				}
 			}
+			++count;
 			clusters.get(newClusterId).addPoint(col);
 		}
+		end = System.nanoTime();
+		System.out.println("Time for second loop: " + ((end-begin)/1000000));
+		
+		System.out.println("Assigned points: " + count);		
 	}
 
 	public KMeans execute(int numOfIterations) throws Exception{
@@ -189,6 +241,8 @@ public class KMeans {
 			throw e;
 		}
 
+		double before = System.nanoTime();
+		
 		for(int i = 0; i < numOfIterations; ++i){
 			
 			System.out.println("ITERATION " + i);
@@ -198,6 +252,11 @@ public class KMeans {
 			reassignPoints();
 			
 		}
+		
+		double after = System.nanoTime();
+		
+		double elapsedMillis = (after - before) / 1000000;
+		System.out.println("Elapsed milliseconds: " + elapsedMillis);
 		
 		return this;
 	}

@@ -13,7 +13,7 @@ public class Main {
 	
 	final static int PRINT_COLS_LIMIT = 15;
 	
-	final static int NUM_OF_ITERATIONS = 1;
+	final static int NUM_OF_ITERATIONS = 10;
 	
 	final static String CSV_PATH = "nmi.csv";
 	

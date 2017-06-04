@@ -46,17 +46,17 @@ public class Cluster {
 			col.setAssignedCluster(this);
 	}
 	
-	public boolean addPoint(Column point){
+	public void addPoint(Column point){
 		// remove from the former cluster
-		if(point.getAssignedCluster() != null && point.getAssignedCluster().getPoints().contains(point))
-			point.getAssignedCluster().removePoint(point);
+		//if(point.getAssignedCluster() != null && point.getAssignedCluster().getPoints().contains(point))
+			//point.getAssignedCluster().removePoint(point);
 		
 		// assign to this cluster
 		point.setAssignedCluster(this);
 		
 		// finally add to this cluster
 		//System.out.println("adding");
-		return points.add(point);
+		points.add(point);
 	}
 	
 	public boolean removePoint(Column point){
@@ -115,4 +115,7 @@ public class Cluster {
 		return true;		
 	}
 	
+	public void resetPoints(){
+		points = new ArrayList<Column>();
+	}
 }

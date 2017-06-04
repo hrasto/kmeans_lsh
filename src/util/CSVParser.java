@@ -17,11 +17,16 @@ public class CSVParser {
 			// Object[][] result = new Object[lines][];
 			ArrayList<ArrayList<Object>> result = new ArrayList<ArrayList<Object>>();
 
+			int limit = 300000;
+			int count = 0;
 			while ((line = br.readLine()) != null) {
+				if(count >= limit)
+					break;
 				// use comma as separator
 				ArrayList<Object> values = new ArrayList<Object>();
 				values.addAll(Arrays.asList(line.split(delimiter)));
 				result.add(values);
+				++count;
 			}
 
 			return result;

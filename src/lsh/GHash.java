@@ -28,7 +28,7 @@ public class GHash implements HashFunction {
 		double sum = 0;
 		
 		for(int i = 0; i < elements.size(); ++i)
-			sum += coefficients.get(i) * elements.get(i).getValue(); 
+			sum += (2*coefficients.get(i)-0.5) * elements.get(i).getValue(); 
 		
 		return sum;
 	}
