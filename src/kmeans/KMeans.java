@@ -11,7 +11,7 @@ import lsh.HashFunction;
 
 public class KMeans {
 	
-	final static String COMBINING_STRATEGY = "NONE";
+	final static String COMBINING_STRATEGY = "AND";
 	
 	final static int BUCKET_SIZE = 10;
 
@@ -58,24 +58,7 @@ public class KMeans {
 			bktResolvers.add(resolver);
 		}
 	}
-	
-	/*
-	public void setUpBuckets(int bucketSize) {
 		
-		
-		if(data == null || hashFunctions == null)
-			throw new NullPointerException("Dataset and hash functions must be set before setting up buckets");
-		
-		buckets = new ArrayList<ArrayList<Bucket>>();
-		
-		for(HashFunction func : hashFunctions){
-			ArrayList<Bucket> newBkts = data.groupByBuckets(bucketSize, func);	
-			buckets.add(newBkts);
-		}
-		
-	}
-	*/
-	
 	public ArrayList<Cluster> getClusters() {
 		return clusters;
 	}
@@ -83,16 +66,6 @@ public class KMeans {
 	public void setClusters(ArrayList<Cluster> clusters) {
 		this.clusters = clusters;
 	}
-	
-	/*
-	public void setHashFunctions(ArrayList<HashFunction> functions){
-		hashFunctions = functions;
-	}
-	
-	public ArrayList<HashFunction> getHashFunctions(){
-		return hashFunctions;
-	}
-	*/
 	
 	public void initializeClusters() throws Exception{
 		
@@ -117,6 +90,7 @@ public class KMeans {
 				
 				Cluster newCluster = new Cluster(bkt.getCols());
 				newCluster.computeCentroid(bktResolvers);
+				//newCluster.resetPoints();
 				clusters.add(newCluster);	
 			}
 			
@@ -143,9 +117,14 @@ public class KMeans {
 			cluster.resetPoints(); // centroid stays
 		}
 
-		begin = System.nanoTime();
 		boolean assigned;
+		double timeSums = 0;
+		int count = 0;
+		
 		for(Column col : data.getCols()){
+
+			begin = System.nanoTime();
+			
 			assigned = false;
 			for(Cluster cluster : clusters){
 				if(COMBINING_STRATEGY.equals("OR")){
@@ -164,68 +143,44 @@ public class KMeans {
 			}
 			if(assigned == false)
 				unprocessedCols.add(col);
-		}
-		end = System.nanoTime();
-		System.out.println("Time for first loop: " + ((end-begin)/1000000));
 
-		/*
-		// assigning columns with the help of hash buckets
-		for(Cluster cluster : clusters){
-			// System.out.println("Cluster HV f: " + cluster.getCentroid().getHashValue(0));
-			// System.out.println("Cluster HV g: " + cluster.getCentroid().getHashValue(1));
-			for(Column col : data.getCols()){	
-				
-				if(processedCols.contains(col)) continue;
-				
-				if(
-					cluster.getCentroid().getHashBucket(0) == col.getHashBucket(0)
-					&& cluster.getCentroid().getHashBucket(1) == col.getHashBucket(1)
-				) {
-					cluster.addPoint(col);
-					processedCols.add(col);
-				}
-				
-				/*
-				// System.out.println("Col HV f: " + unprCol.getHashValue(0));
-				// System.out.println("Col HV g: " + unprCol.getHashValue(1));
-				if(COMBINING_STRATEGY.equals("OR")){
-					if(cluster.isCandidatePairOR(bktResolvers, col)){
-						cluster.addPoint(col);
-						processedCols.add(col);
-					}
-				}else if(COMBINING_STRATEGY.equals("AND")){
-					if(cluster.isCandidatePairAND(bktResolvers, col)){
-						cluster.addPoint(col);
-						processedCols.add(col);
-					}
-				}
-			}			
+			end = System.nanoTime();
+			timeSums += end - begin;
+			++count;
 		}
-				*/
 		
+		//end = System.nanoTime();
+		System.out.println("Mean-Iteration-Time, 1st loop: " + (timeSums/count));
 		System.out.println("Points assigned based on hashing: " + (data.getCols().size() - unprocessedCols.size()));
 		System.out.println("Remaining points to assign: " + (unprocessedCols.size()));
 		
 		// assigning the remaining columns 
-		begin = System.nanoTime();
-		int count = 0;
+		// begin = System.nanoTime();
+		count = 0;
+		timeSums = 0;
 		for(Column col : unprocessedCols){
+			
+			begin = System.nanoTime();
+			
 			Cluster newCluster = clusters.get(0);
-			int newClusterId = 0;
+			//int newClusterId = 0;
 			double min = Column.euclidianDistance(newCluster.getCentroid(), col);
-			for(int i = 1; i < clusters.size(); ++i){
-				double dist = Column.euclidianDistance(clusters.get(i).getCentroid(), col);
+			for(Cluster cluster : clusters){
+				double dist = Column.euclidianDistance(cluster.getCentroid(), col);
 				if(min > dist){
 					min = dist;
-					newCluster = clusters.get(i);
-					newClusterId = i;
+					newCluster = cluster;
+					//newClusterId = i;
 				}
 			}
+			newCluster.addPoint(col);
+
+			end = System.nanoTime();
+			timeSums += end-begin;
 			++count;
-			clusters.get(newClusterId).addPoint(col);
 		}
-		end = System.nanoTime();
-		System.out.println("Time for second loop: " + ((end-begin)/1000000));
+		//end = System.nanoTime();
+		System.out.println("Mean-Iteration-Time, 2nd loop: " + ((timeSums)/count));
 		
 		System.out.println("Assigned points: " + count);		
 	}
@@ -237,7 +192,7 @@ public class KMeans {
 		}catch(Exception e){
 			throw e;
 		}
-
+		
 		double before = System.nanoTime();
 		
 		for(int i = 0; i < numOfIterations; ++i){
