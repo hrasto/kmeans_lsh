@@ -13,7 +13,7 @@ public class KMeans {
 	
 	final static String COMBINING_STRATEGY = "AND";
 	
-	final static int BUCKET_SIZE = 10;
+	final static int BUCKET_SIZE = 4;
 
 	final static int NUM_OF_CLUSTERS = 15;
 	

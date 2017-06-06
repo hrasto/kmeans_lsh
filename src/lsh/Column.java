@@ -199,7 +199,8 @@ public class Column {
 	public static double euclidianDistance(Column col1, Column col2){
 		double sumSquares = 0;
 		for(int i = 0; i < col1.getElements().size(); ++i)
-			sumSquares += Math.pow((col1.getElement(i).getValue() - col2.getElement(i).getValue()), 2);
+			sumSquares += (col1.getElement(i).getValue() - col2.getElement(i).getValue()) // multiplication should be faster than pow()
+				*(col1.getElement(i).getValue() - col2.getElement(i).getValue());
 		
 		return Math.sqrt(sumSquares);			
 	}
